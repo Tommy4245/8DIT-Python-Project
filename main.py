@@ -15,7 +15,7 @@ class MovieAPI:
             json_data = response.json()
             return json_data
         else:
-            print("API call failed.")
+            print("API call failed")
             return None
 
 class UsersWatchlist:
@@ -81,15 +81,12 @@ def movie_appending_and_printing_system(movie_data):
     url = "https://api.themoviedb.org/3/genre/movie/list?language=en"
     headers = {"accept": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YmQ3YzJjNTg0ZmIwMzA2NWFmMjQ1YjY4NGQxNWFkMSIsInN1YiI6IjY2MDRkMGU3MTVkZWEwMDE4NTI3NmU0NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.URJ1s8L_2rhk4quhJbuXHzajszCJN58mpX1u1vvP8uU"}
     response = requests.get(url, headers=headers)
-    
     if response.status_code == 200:
         genre_dict = response.json()
-        # Extracting genre names from the dictionary
         genre_names = {genre['id']: genre['name'] for genre in genre_dict.get('genres', [])}
     else:
         print("Failed to fetch genre data.")
         return
-    
     if movie_data:
         movie_info_list = []
         for id_number, movie in enumerate(movie_data['results']):
@@ -107,16 +104,12 @@ def movie_appending_and_printing_system(movie_data):
             print(f"Genres: {genres_str}")
             print(f"Overview: {movie['overview']}")
             print()
-        while True:
-            the_movie_user_wants = number_input_validation("Looking at the ID numbers above, would you like to add any movies to your watchlist? Type 0 to return to the menu: ", 0, len(movie_data))
-            if the_movie_user_wants == 0:
-                break
-            UsersWatchlist.add_movies_to_watchlist(movie_info_list[the_movie_user_wants - 1])
+        the_movie_user_wants = number_input_validation("Looking at the ID numbers above, would you like to add a Movie to your watchlist? Type 0 to return to the menu: ", 0, len(movie_data['results']))
+        if the_movie_user_wants == 0:
+            menu()
+        watchlist = UsersWatchlist()
+        watchlist.add_movies_to_watchlist(movie_info_list[the_movie_user_wants - 1])
         menu()
-    else:
-        print("No movies found for the specified year.")
-
-
 
 
 def year_movie_filter():
@@ -159,10 +152,27 @@ def genre_movie_filter():
     
 
 def popular_movie_filter():
-    pass
+    print("Currently the most popular Movies are")
+    popular_movie_url = f"/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc"
+    movie_api = MovieAPI(popular_movie_url)
+    movie_data = movie_api.get_movie_info()
+    movie_appending_and_printing_system(movie_data)
 
 def search_movie_filter():
-    pass
+    while True:
+        print("What Movie Would you like to view")
+        movie_searched = input(":")
+        search_movie_url = f"/3/search/movie?query={movie_searched}"
+        movie_api = MovieAPI(search_movie_url)
+        movie_data = movie_api.get_movie_info()
+        if movie_data is not None:
+            if len(movie_data.get('results', [])) > 0:
+                print("Heres your Movies related to", movie_searched)
+                movie_appending_and_printing_system(movie_data)
+            else:
+                print("That Movie does not exsist, please make sure you are choosing a real Movie")
+        else:
+            print("Failed to fetch movie data")
 
 def menu():
     print("\nWhat action would you like to execute?")
@@ -173,8 +183,8 @@ def menu():
     if user_choice == 1:
         movie_filter_selection()
     if user_choice == 2:
-        # Call function for user to view their favourites list which is the watchlist function in UsersWatchlist object
-        pass
+        watchlist_version = UsersWatchlist()
+        watchlist_version.watchlist()  
     if user_choice == 3:
         sys.exit()
 
@@ -198,4 +208,3 @@ print("Welcome to Tom's Movie finder")
 print("In this program you will be able filter through Movies find your favourites!")
 print("Enjoy")
 menu()
-
