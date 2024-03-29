@@ -1,6 +1,7 @@
 import requests
 import sys
 import config
+watchlist_to_make_instances = []
 
 class MovieAPI:
     def __init__(self, user_url_input):
@@ -18,12 +19,15 @@ class MovieAPI:
             print("API call failed")
             return None
 
+
 class UsersWatchlist:
     def __init__(self):
         self.watchlist_list = []
 
+
     def add_movies_to_watchlist(self, user_movie):
         self.watchlist_list.append(user_movie)
+
 
     def watchlist(self):
         length_of_watchlist = len(self.watchlist_list)
@@ -31,13 +35,19 @@ class UsersWatchlist:
             print("Currently there's no Movies in your Watchlist")
             menu()
         else:
-            for watch in range(length_of_watchlist):
-                print("Movie Number", watch + 1, self.watchlist_list[watch])
+            for watch in range(len(self.watchlist_list)):
+                movie_info = self.watchlist_list[watch]
+                print("\nID Number:", watch + 1)
+                print("Title:", movie_info[0])
+                print("Rating:", movie_info[1])
+                print("Genre:", movie_info[2])
+                print("Overview:", movie_info[3])
         menu_or_remove = string_input_validation("Please type Remove to remove items from your watchlist, if you do not want to do this please type Menu", "REMOVE", "MENU", "Please Choose a Valid Option which is Remove or Menu")
         if menu_or_remove == "MENU":
             print("Now returning to the Menu")
         elif menu_or_remove == "REMOVE":
             self.remove_movies_from_watchlist()
+
 
     def remove_movies_from_watchlist(self):
         remove_movie_number = number_input_validation("Looking at the Movie Number please enter the Movie Number of the Movie you would like to remove, type 0 if you would like to return to Menu", 0, len(self.watchlist_list))
@@ -45,11 +55,12 @@ class UsersWatchlist:
             menu()
         else:
             del self.watchlist_list[remove_movie_number - 1]
-        remove_something_else = string_input_validation("Please type Remove to remove more items from your watchlist, if you do not want to do this please type Menu", "YES", "NO", "Please Choose a Valid Option which is Yes or No")
+        remove_something_else = string_input_validation("Please type Remove to remove more items from your watchlist, if you do not want to do this please type Menu", "REMOVE", "MENU", "Please Choose a Valid Option which is Yes or No")
         if remove_something_else == "YES":
             self.remove_movies_from_watchlist()
         elif remove_something_else == "NO":
             menu()
+
 
 def number_input_validation(msg, minimum, maximum):
     print(msg)
@@ -75,7 +86,6 @@ def string_input_validation(msg, option1, option2, invalid_select_option1_or_2):
         except Exception as e:
             print(e)
 
-   
 
 def movie_appending_and_printing_system(movie_data):
     url = "https://api.themoviedb.org/3/genre/movie/list?language=en"
@@ -107,8 +117,7 @@ def movie_appending_and_printing_system(movie_data):
         the_movie_user_wants = number_input_validation("Looking at the ID numbers above, would you like to add a Movie to your watchlist? Type 0 to return to the menu: ", 0, len(movie_data['results']))
         if the_movie_user_wants == 0:
             menu()
-        watchlist = UsersWatchlist()
-        watchlist.add_movies_to_watchlist(movie_info_list[the_movie_user_wants - 1])
+        watchlist_to_make_instances.append(movie_info_list[the_movie_user_wants - 1])
         menu()
 
 
@@ -149,7 +158,6 @@ def genre_movie_filter():
     movie_data = movie_api.get_movie_info()
     movie_appending_and_printing_system(movie_data)
 
-    
 
 def popular_movie_filter():
     print("Currently the most popular Movies are")
@@ -157,6 +165,7 @@ def popular_movie_filter():
     movie_api = MovieAPI(popular_movie_url)
     movie_data = movie_api.get_movie_info()
     movie_appending_and_printing_system(movie_data)
+
 
 def search_movie_filter():
     while True:
@@ -184,9 +193,11 @@ def menu():
         movie_filter_selection()
     if user_choice == 2:
         watchlist_version = UsersWatchlist()
-        watchlist_version.watchlist()  
+        watchlist_version.add_movies_to_watchlist(watchlist_to_make_instances)
+        watchlist_version.watchlist()
     if user_choice == 3:
         sys.exit()
+
 
 def movie_filter_selection():
     print("\nHow would you like to filter to find a Movie?")
@@ -203,6 +214,7 @@ def movie_filter_selection():
         popular_movie_filter()
     elif movie_filter_choice == 4:
         search_movie_filter()
+
 
 print("Welcome to Tom's Movie finder")
 print("In this program you will be able filter through Movies find your favourites!")
