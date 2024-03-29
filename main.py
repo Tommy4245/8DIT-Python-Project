@@ -24,19 +24,17 @@ class UsersWatchlist:
     def __init__(self):
         self.watchlist_list = []
 
-
-    def add_movies_to_watchlist(self, user_movie):
-        self.watchlist_list.append(user_movie)
-
+    def add_movies_to_watchlist(self, movie_title, movie_rating, movie_genre, movie_overview):
+        self.watchlist_list.append([movie_title, movie_rating, movie_genre, movie_overview])
 
     def watchlist(self):
         length_of_watchlist = len(self.watchlist_list)
         if length_of_watchlist == 0:
-            print("Currently there's no Movies in your Watchlist")
+            print("Currently there are no movies in your watchlist")
+            print("Returning to Menu")
             menu()
         else:
-            for watch in range(len(self.watchlist_list)):
-                movie_info = self.watchlist_list[watch]
+            for watch, movie_info in enumerate(self.watchlist_list):
                 print("\nID Number:", watch + 1)
                 print("Title:", movie_info[0])
                 print("Rating:", movie_info[1])
@@ -45,6 +43,7 @@ class UsersWatchlist:
         menu_or_remove = string_input_validation("Please type Remove to remove items from your watchlist, if you do not want to do this please type Menu", "REMOVE", "MENU", "Please Choose a Valid Option which is Remove or Menu")
         if menu_or_remove == "MENU":
             print("Now returning to the Menu")
+            menu()
         elif menu_or_remove == "REMOVE":
             self.remove_movies_from_watchlist()
 
@@ -54,11 +53,13 @@ class UsersWatchlist:
         if remove_movie_number == 0:
             menu()
         else:
-            del self.watchlist_list[remove_movie_number - 1]
-        remove_something_else = string_input_validation("Please type Remove to remove more items from your watchlist, if you do not want to do this please type Menu", "REMOVE", "MENU", "Please Choose a Valid Option which is Yes or No")
+            del watchlist_to_make_instances[remove_movie_number - 1]
+        print("Your New Watchlist is\n")
+        remove_something_else = string_input_validation("Would you like to Remove anything else", "YES", "NO", "Please Choose a Valid Option which is Yes or No")
         if remove_something_else == "YES":
             self.remove_movies_from_watchlist()
         elif remove_something_else == "NO":
+            print("Returning to menu")
             menu()
 
 
@@ -183,6 +184,7 @@ def search_movie_filter():
         else:
             print("Failed to fetch movie data")
 
+
 def menu():
     print("\nWhat action would you like to execute?")
     print("Type 1 if you would like to find a Movie")
@@ -192,8 +194,13 @@ def menu():
     if user_choice == 1:
         movie_filter_selection()
     if user_choice == 2:
-        watchlist_version = UsersWatchlist()
-        watchlist_version.add_movies_to_watchlist(watchlist_to_make_instances)
+        watchlist_version = UsersWatchlist() 
+        for watch in range(len(watchlist_to_make_instances)): 
+            title = watchlist_to_make_instances[watch][0]
+            rating = watchlist_to_make_instances[watch][1]
+            genre = watchlist_to_make_instances[watch][2]
+            overview = watchlist_to_make_instances[watch][3]
+            watchlist_version.add_movies_to_watchlist(title, rating, genre, overview)  
         watchlist_version.watchlist()
     if user_choice == 3:
         sys.exit()
