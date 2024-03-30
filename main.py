@@ -1,6 +1,17 @@
 import requests
 import sys
+import os
 import config
+
+try:
+    import requests
+except ImportError:
+    print("Please install the requests package by running")
+    print("pip install requests")
+    print("This program can not run without the requests package")
+    print("Exiting...")
+    os._exit(1)
+
 watchlist_to_make_instances = []
 
 class MovieAPI:
@@ -55,8 +66,10 @@ class UsersWatchlist:
         else:
             del watchlist_to_make_instances[remove_movie_number - 1]
         print("Your New Watchlist is\n")
+        getting_watchlist_to_object()
         remove_something_else = string_input_validation("Would you like to Remove anything else", "YES", "NO", "Please Choose a Valid Option which is Yes or No")
         if remove_something_else == "YES":
+            getting_watchlist_to_object()
             self.remove_movies_from_watchlist()
         elif remove_something_else == "NO":
             print("Returning to menu")
@@ -84,8 +97,19 @@ def string_input_validation(msg, option1, option2, invalid_select_option1_or_2):
                 return users_choice
             else:
                 print(invalid_select_option1_or_2)
-        except Exception as e:
-            print(e)
+        except:
+            print(invalid_select_option1_or_2)
+
+
+def getting_watchlist_to_object():
+    watchlist_version = UsersWatchlist() 
+    for watch in range(len(watchlist_to_make_instances)): 
+        title = watchlist_to_make_instances[watch][0]
+        rating = watchlist_to_make_instances[watch][1]
+        genre = watchlist_to_make_instances[watch][2]
+        overview = watchlist_to_make_instances[watch][3]
+        watchlist_version.add_movies_to_watchlist(title, rating, genre, overview)  
+    watchlist_version.watchlist()
 
 
 def movie_appending_and_printing_system(movie_data):
@@ -194,14 +218,7 @@ def menu():
     if user_choice == 1:
         movie_filter_selection()
     if user_choice == 2:
-        watchlist_version = UsersWatchlist() 
-        for watch in range(len(watchlist_to_make_instances)): 
-            title = watchlist_to_make_instances[watch][0]
-            rating = watchlist_to_make_instances[watch][1]
-            genre = watchlist_to_make_instances[watch][2]
-            overview = watchlist_to_make_instances[watch][3]
-            watchlist_version.add_movies_to_watchlist(title, rating, genre, overview)  
-        watchlist_version.watchlist()
+        getting_watchlist_to_object()
     if user_choice == 3:
         sys.exit()
 
