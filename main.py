@@ -1,7 +1,7 @@
-import requests
-import sys
-import os
-import config
+import requests #Imports the requests package, this allows me to make my API calls
+import sys #Imports sys, this allows me to use the function sys.exit() 
+import os  #Imports os so I am able to check if a user has PIP and reuests installed 
+import config #This is imported from another local file and contains my API Key
 
 try:
     import requests
@@ -15,12 +15,16 @@ except ImportError:
 watchlist_to_make_instances = []
 
 class MovieAPI:
+    """Class to interact with the Movie Database API being TMDb"""
+
     def __init__(self, user_url_input):
+        """Initialize MovieAPI object by useing __init__ with base URL and API key from config.py"""
         self.base_url = "https://api.themoviedb.org"
         self.user_url_input = user_url_input
         self.api_key = config.API_KEY
 
     def get_movie_info(self):
+        """This Function makes a endpoint and then Fetches key infomation from the TMDb API"""
         endpoint = self.base_url + self.user_url_input + f"&api_key={self.api_key}"
         response = requests.get(endpoint)
         if response.status_code == 200:
@@ -32,13 +36,18 @@ class MovieAPI:
 
 
 class UsersWatchlist:
+    """Class which allows the user to manage and modify movies in there watchlist"""
+    
     def __init__(self):
+        """Initalizes the Object by useing __init__ and makeing a empty list for the users watchlist"""
         self.watchlist_list = []
 
     def add_movies_to_watchlist(self, movie_title, movie_rating, movie_genre, movie_overview):
+        """Makes all the instances of data the User needs for the Watchlist then appends it to the empty list"""
         self.watchlist_list.append([movie_title, movie_rating, movie_genre, movie_overview])
 
     def watchlist(self):
+        """This Function displays the Users Watchlist by printing out the self.watchlist_list, it also allows for the user to modify the list"""
         length_of_watchlist = len(self.watchlist_list)
         if length_of_watchlist == 0:
             print("Currently there are no movies in your watchlist")
@@ -51,23 +60,23 @@ class UsersWatchlist:
                 print("Rating:", movie_info[1])
                 print("Genre:", movie_info[2])
                 print("Overview:", movie_info[3])
-        menu_or_remove = string_input_validation("Please type Remove to remove items from your watchlist, if you do not want to do this please type Menu", "REMOVE", "MENU", "Please Choose a Valid Option which is Remove or Menu")
+        menu_or_remove = string_input_validation("Please type Remove to remove items from your watchlist, if you do not want to do this please type Menu to return to the menu", "REMOVE", "MENU", "Please Choose a Valid Option which is Remove or Menu")
         if menu_or_remove == "MENU":
             print("Now returning to the Menu")
             menu()
         elif menu_or_remove == "REMOVE":
             self.remove_movies_from_watchlist()
 
-
     def remove_movies_from_watchlist(self):
-        remove_movie_number = number_input_validation("Looking at the Movie Number please enter the Movie Number of the Movie you would like to remove, type 0 if you would like to return to Menu", 0, len(self.watchlist_list))
+        """Allows for the user to remove items from there watchlist"""
+        remove_movie_number = number_input_validation("Looking at the Movie ID Number please enter the Movie ID Number of the Movie you would like to remove", 1, len(self.watchlist_list))
         if remove_movie_number == 0:
             menu()
         else:
             del watchlist_to_make_instances[remove_movie_number - 1]
         print("Your New Watchlist is\n")
         getting_watchlist_to_object()
-        remove_something_else = string_input_validation("Would you like to Remove anything else", "YES", "NO", "Please Choose a Valid Option which is Yes or No")
+        remove_something_else = string_input_validation("Would you like to Remove anything else, please type 'yes' or 'no'", "YES", "NO", "Please Choose a Valid Option which is Yes or No")
         if remove_something_else == "YES":
             getting_watchlist_to_object()
             self.remove_movies_from_watchlist()
@@ -77,11 +86,14 @@ class UsersWatchlist:
 
 
 def number_input_validation(msg, minimum, maximum):
+    """Validate int values that the user has selected and has boundarys to validate the user response is in range, also allows the user to return to the menu at any time if they type 0"""
     print(msg)
     while True:
         try:
             user_response = int(input(":"))
-            if minimum <= user_response <= maximum:
+            if user_response == 0:
+                menu()
+            elif minimum <= user_response <= maximum:
                 return user_response
             else:
                 print("That item is not in range")
@@ -89,9 +101,13 @@ def number_input_validation(msg, minimum, maximum):
             print("Invalid answer")
 
 def string_input_validation(msg, option1, option2, invalid_select_option1_or_2):
+    """Validate string input againts options by haveing 2 valid awnsers, also allows the user to return to the menu at any time if they type 0"""
+    print(msg)
     while True:
         try:
-            users_choice = input(msg)
+            users_choice = input(":")
+            if users_choice == "0":
+                menu()
             users_choice = users_choice.upper()
             if users_choice == option1 or users_choice == option2:
                 return users_choice
@@ -100,8 +116,8 @@ def string_input_validation(msg, option1, option2, invalid_select_option1_or_2):
         except:
             print(invalid_select_option1_or_2)
 
-
 def getting_watchlist_to_object():
+    """Convert watchlist data into UsersWatchlist object by useing the external list watchlist_to_make_instances"""
     watchlist_version = UsersWatchlist() 
     for watch in range(len(watchlist_to_make_instances)): 
         title = watchlist_to_make_instances[watch][0]
@@ -113,6 +129,7 @@ def getting_watchlist_to_object():
 
 
 def movie_appending_and_printing_system(movie_data):
+    """Append movie data to the watchlist_to_make_instances external list and prints data from the API so a User can decide what movies they want to add to there watchlist"""
     url = "https://api.themoviedb.org/3/genre/movie/list?language=en"
     headers = {"accept": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YmQ3YzJjNTg0ZmIwMzA2NWFmMjQ1YjY4NGQxNWFkMSIsInN1YiI6IjY2MDRkMGU3MTVkZWEwMDE4NTI3NmU0NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.URJ1s8L_2rhk4quhJbuXHzajszCJN58mpX1u1vvP8uU"}
     response = requests.get(url, headers=headers)
@@ -120,7 +137,7 @@ def movie_appending_and_printing_system(movie_data):
         genre_dict = response.json()
         genre_names = {genre['id']: genre['name'] for genre in genre_dict.get('genres', [])}
     else:
-        print("Failed to fetch genre data.")
+        print("Failed to fetch genre data")
         return
     if movie_data:
         movie_info_list = []
@@ -139,14 +156,13 @@ def movie_appending_and_printing_system(movie_data):
             print(f"Genres: {genres_str}")
             print(f"Overview: {movie['overview']}")
             print()
-        the_movie_user_wants = number_input_validation("Looking at the ID numbers above, would you like to add a Movie to your watchlist? Type 0 to return to the menu: ", 0, len(movie_data['results']))
-        if the_movie_user_wants == 0:
-            menu()
+        the_movie_user_wants = number_input_validation("Looking at the ID numbers above, would you like to add a Movie to your watchlist? Rember to type 0 if you would not like to so you can return to the menu", 1, len(movie_data['results']))
         watchlist_to_make_instances.append(movie_info_list[the_movie_user_wants - 1])
         menu()
 
 
 def year_movie_filter():
+    """Filters Movies by there release Year, I have given the user the option to select Movies from 2000 - 2024"""
     movie_year = number_input_validation("What years Movies do you want to filter through, I offer from 2000 - 2024", 2000, 2024)
     api_url_user_request = f"/3/discover/movie?primary_release_year={movie_year}"
     movie_api = MovieAPI(api_url_user_request)
@@ -155,6 +171,7 @@ def year_movie_filter():
 
 
 def genre_movie_filter():
+    """Filters Movies by Genre"""
     genre_ids = [28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 10770, 53, 10752, 37]
     print("Please Type 1 to Filter for Action")
     print("Please Type 2 to Filter for Adventure")
@@ -175,7 +192,7 @@ def genre_movie_filter():
     print("Please Type 17 to Filter for Thriller")
     print("Please Type 18 to Filter for War")
     print("Please Type 19 to Filter for Western")
-    movie_genre = number_input_validation("Please choose a response",1, 19)
+    movie_genre = number_input_validation("Please choose a Genre you would like to filter with",1, 19)
     movie_genre = movie_genre - 1
     users_chosen_genre = genre_ids[movie_genre]
     api_url_user_request = f"/3/discover/movie?with_genres={users_chosen_genre}&sort_by=popularity.desc"
@@ -185,6 +202,7 @@ def genre_movie_filter():
 
 
 def popular_movie_filter():
+    """Filter popular movies."""
     print("Currently the most popular Movies are")
     popular_movie_url = f"/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc"
     movie_api = MovieAPI(popular_movie_url)
@@ -193,6 +211,7 @@ def popular_movie_filter():
 
 
 def search_movie_filter():
+    """This Function allows for users to Search for movies by the title"""
     while True:
         print("What Movie Would you like to view")
         movie_searched = input(":")
@@ -210,6 +229,7 @@ def search_movie_filter():
 
 
 def menu():
+    """Display the main menu for users with options so they can then choose a function to execute"""
     print("\nWhat action would you like to execute?")
     print("Type 1 if you would like to find a Movie")
     print("Type 2 to view your Favourites Watchlist")
@@ -224,6 +244,7 @@ def menu():
 
 
 def movie_filter_selection():
+    """Display options for filtering movies such as by year, genre, popularity and even search by title"""
     print("\nHow would you like to filter to find a Movie?")
     print("Type 1 if you want to Filter by year")
     print("Type 2 Filter by Genre")
@@ -239,8 +260,9 @@ def movie_filter_selection():
     elif movie_filter_choice == 4:
         search_movie_filter()
 
-
+#The Begining point of my Program where it prints our basic infomation and the brings the user to the Menu function
 print("Welcome to Tom's Movie finder")
 print("In this program you will be able filter through Movies find your favourites!")
+print("At Any moment if you wish to return to the menu simply type 0")
 print("Enjoy")
 menu()
