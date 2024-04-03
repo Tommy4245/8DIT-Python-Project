@@ -31,13 +31,15 @@ class MovieAPI:
             response = requests.get(endpoint) #This is the call for the data from my API
         except:
             print("API call failed, Please check your internet is working and you have disabled any website blockers") #This is here incase the API call fails due to potentially internet issues ect, this catches the code before the program crashes
-            os._exit(1)
+            print("I am now going to return you to the Menu and you can decide if you want to keep trying or close the Program their")
+            menu()
         if response.status_code == 200: #If the status code is 200 we know the API call was sucsessful which then allows us to return the data requested to where it was called
             json_data = response.json()
             return json_data
         else: 
             print("API call failed") #This just some extra robustness incase somehow invalid infomation escapes the first input validation, this explicitly check if the code is 200 and if it isn't the code indicates that something went wrong
-            os._exit
+            print("I am now going to return you to the Menu and you can decide if you want to keep trying or close the Program their")
+            menu()
 
 
 class UsersWatchlist:
@@ -65,6 +67,7 @@ class UsersWatchlist:
                 print("Rating:", movie_info[1])
                 print("Genre:", movie_info[2])
                 print("Overview:", movie_info[3])
+        print()
         menu_or_remove = string_input_validation("Please type Remove to remove items from your watchlist, if you do not want to do this please type Menu to return to the menu", "REMOVE", "MENU", "Please Choose a Valid Option which is Remove or Menu") #checks to see if the user would like to remove infomation from there watchlist or return to the menu
         if menu_or_remove == "MENU":
             print("Now returning to the Menu")
@@ -74,18 +77,11 @@ class UsersWatchlist:
 
     def remove_movies_from_watchlist(self):
         """Allows for the user to remove items from there watchlist"""
-        remove_movie_number = number_input_validation("Looking at the Movie ID Number please enter the Movie ID Number of the Movie you would like to remove", 1, len(self.watchlist_list)) #Gets the user to select what movie they would like to remove from their watchlist
+        remove_movie_number = number_input_validation("\nLooking at the Movie ID Number please enter the Movie ID Number of the Movie you would like to remove", 1, len(self.watchlist_list)) #Gets the user to select what movie they would like to remove from their watchlist
         del watchlist_to_make_instances[remove_movie_number - 1]
-        print("Your New Watchlist is")
-        getting_watchlist_to_object() #Runs the watchlist function again and updates the instances so we get a new list of Movies currently in the Users watchlist and then repeats the process of asking if the user would like to remove anything from there cart 
-        
-        '''remove_something_else = string_input_validation("Would you like to Remove anything else, please type 'yes' or 'no'", "YES", "NO", "Please Choose a Valid Option which is Yes or No") #Asks the user if they would like to remove more movies from the watchlist or not 
-        if remove_something_else == "YES":
-            getting_watchlist_to_object()
-            self.remove_movies_from_watchlist()
-        elif remove_something_else == "NO":
-            print("Returning to menu")
-            menu()'''
+        if watchlist_to_make_instances:
+            print("Your New Watchlist is")
+        getting_watchlist_to_object() #Runs the watchlist function again and updates the instances so we get a new list of Movies currently in the Users watchlist and then repeats the process of asking if the user would like to remove anything from there cart      
 
 def number_input_validation(msg, minimum, maximum):
     """Validate int values that the user has selected and has boundarys to validate the user response is in range, also allows the user to return to the menu at any time if they type 0
@@ -104,7 +100,7 @@ def number_input_validation(msg, minimum, maximum):
             else:
                 print("That item is not in range")
         except ValueError:
-            print("Invalid answer")
+            print("Invalid answer, please make sure to choose a number between",min,"-",max)
 
 def string_input_validation(msg, option1, option2, invalid_select_option1_or_2):
     """Validate string input againts options by haveing 2 valid awnsers, also allows the user to return to the menu at any time if they type 0
@@ -147,12 +143,14 @@ def movie_appending_and_printing_system(movie_data):
         response = requests.get(url, headers=headers) #Gets the genres dictionary from the TMDb API
     except:
         print("API call failed, Please check your internet is working and you have disabled any website blockers") #This is here incase the API call fails due to potentially internet issues ect, this catches the code before the program crashes
-        os._exit(1)
+        print("I am now going to return you to the Menu and you can decide if you want to keep trying or close the Program their")
+        menu()
     if response.status_code == 200: #Checks that it went sucsessfully 
         genre_dict = response.json() 
         genre_names = {genre['id']: genre['name'] for genre in genre_dict.get('genres', [])} #Makes the Dictionary translatible for me so I can find genres in aquantince to their Key
     else:
         print("Failed to fetch genre data, API Call Failed") #Backup just incase something doesn't get picked up in my first input validation
+        print("I am now going to return you to the Menu and you can decide if you want to keep trying or close the Program their")
         menu()           
     if movie_data: #Easy way to make sure that there is data from the API 
         movie_info_list = [] #Creates a list that will contain all the movies sent from the API
@@ -165,12 +163,12 @@ def movie_appending_and_printing_system(movie_data):
             movie_info.append(genres_str)
             movie_info.append(movie['overview'])
             movie_info_list.append(movie_info)
-            print(f"ID Number: {id_number + 1}")
+            print(f"\nID Number: {id_number + 1}")
             print(f"Title: {movie['title']}")
             print(f"Rating: {movie['vote_average']}")
             print(f"Genres: {genres_str}")
             print(f"Overview: {movie['overview']}")
-            print()
+        print()
         the_movie_user_wants = number_input_validation("Looking at the ID numbers above, would you like to add a Movie to your watchlist? Rember to type 0 if you would not like to so you can return to the menu", 1, len(movie_data['results'])) #Gets the User to add any movies they would like in their watchlist
         watchlist_to_make_instances.append(movie_info_list[the_movie_user_wants - 1]) #Appends the Movie that the user wants to the external list being watchlist_to_make_instances
         menu()
@@ -188,7 +186,7 @@ def year_movie_filter():
 def genre_movie_filter():
     """Filters Movies by Genre"""
     genre_ids = [28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 10770, 53, 10752, 37] #This is a list that allows that allows me to link the users response to the dictionary key in TMDb for genres 
-    print("Please Type 1 to Filter for Action")
+    print("\nPlease Type 1 to Filter for Action")
     print("Please Type 2 to Filter for Adventure")
     print("Please Type 3 to Filter for Animation")
     print("Please Type 4 to Filter for Comedy")
@@ -206,7 +204,7 @@ def genre_movie_filter():
     print("Please Type 16 to Filter for TV Movie")
     print("Please Type 17 to Filter for Thriller")
     print("Please Type 18 to Filter for War")
-    print("Please Type 19 to Filter for Western")
+    print("Please Type 19 to Filter for Western\n")
     movie_genre = number_input_validation("Please choose a Genre you would like to filter with",1, 19) 
     movie_genre = movie_genre - 1 #figures out the index number in the list above and therefore assoicates the correct genre with its key
     users_chosen_genre = genre_ids[movie_genre] #Gets the genre key
