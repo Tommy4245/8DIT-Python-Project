@@ -278,8 +278,9 @@ def movie_filter_selection():
         search_movie_filter()
 
 # The Begining point of my Program where it prints our basic infomation and the brings the user to the Menu function
-print("Welcome to Tom's Movie finder")
-print("In this program you will be able filter through Movies find your favourites!")
-print("At Any moment if you wish to return to the menu simply type 0")
-print("Enjoy")
-menu()
+if __name__ == "__main__":
+    print("Welcome to Tom's Movie finder")
+    print("In this program you will be able filter through Movies find your favourites!")
+    print("At Any moment if you wish to return to the menu simply type 0")
+    print("Enjoy")
+    menu()
